@@ -64,7 +64,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 # Upload file
 st.subheader("Upload Data")
-uploaded_file = st.file_uploader("Unggah file Excel (.xlsx)", type=["xlsx"])
+uploaded_file = st.file_uploader("Unggah file Excel (.xlsx)", type=["xlsx", "csv"])
+st.caption("Panduan [klik disini](%s)" % "https://youtu.be/ClxcSgtwIiA")
 if uploaded_file is not None:
     if uploaded_file.name != st.session_state["uploaded_filename"]:
         st.toast(f"✅ File berhasil diunggah: {uploaded_file.name}")
@@ -76,7 +77,10 @@ else:
 # membaca file
 if uploaded_file is not None:
     try:
-        df = pd.read_excel(uploaded_file, parse_dates= True)
+        if uploaded_file.name.lower().endswith('.csv'):
+            df = pd.read_csv(uploaded_file)
+        elif uploaded_file.name.lower().endswith(('.xls', '.xlsx')):
+            df = pd.read_excel(uploaded_file, parse_dates=True)
         # formatting data
         def formatting(df):
             # Deteksi kolom pertama
@@ -91,16 +95,12 @@ if uploaded_file is not None:
             return styled_df
         # Tampilkan data
         st.dataframe(formatting(df))
-        # Tentukan nama file baru
-        new_filename = "data.csv"
-        df.to_csv(new_filename, index=False)
-        data = pd.read_csv(new_filename)
         # Pilih Variabel
         col1, col2 = st.columns(2)
         with col1:
-            tahun = st.selectbox("Pilih variabel tahun:", data.columns)
+            tahun = st.selectbox("Pilih variabel tahun:", df.columns)
         with col2:
-            var = st.selectbox("Pilih variabel forecasting:", data.columns)
+            var = st.selectbox("Pilih variabel forecasting:", df.columns)
         # Pilih metode dan input forecast
         col21, col22 = st.columns(2)
         with col21:
@@ -108,7 +108,10 @@ if uploaded_file is not None:
         with col22:
             forecast = st.number_input(label="Masukkan jumlah forecast", min_value=0, max_value=100)
         # Buat fix dataset
-        dataset = data[[tahun, var]].set_index(tahun)
+        dataset = df[[tahun, var]]
+        # dataset[tahun] = pd.to_datetime(dataset[tahun], errors="coerce")
+        dataset[var] = pd.to_numeric(dataset[var], errors='coerce')
+        dataset = dataset.set_index(tahun)
         # split train dan test data
         df_train = dataset.iloc[:round(len(dataset) * 0.8)]
         df_test = dataset.iloc[round(len(dataset) * 0.8):]
@@ -205,7 +208,7 @@ if uploaded_file is not None:
                 forecast_train = forecasting(select_model, df_train, len(df_test), alpha, beta, pdq)
                 # Visualisasi data train
                 fig = plt.figure(figsize=(10, 5))
-                fig.suptitle(f'{var} Daerah Kabupaten Tulungagung Tahun {int(dataset.index.min())} - {int(dataset.index.max())}', fontsize=12)
+                fig.suptitle(f'{var} Tahun {int(dataset.index.min())} - {int(dataset.index.max())}', fontsize=12)
                 past, = plt.plot(df_train.index, df_train, "b.-", label= f'History {var}')
                 future, = plt.plot(df_test.index, df_test, "r.-", label= f'Aktual {var}')
                 pred_future, = plt.plot(df_test.index, forecast_train, "g.--", label= f'Forecasting {var}')
@@ -236,10 +239,10 @@ if uploaded_file is not None:
                 fig2 = plt.figure(figsize=(10, 5))
                 if forecast ==1:
                     fig2.suptitle(
-                        f'Forecasting {var} Daerah Kabupaten Tulungagung Tahun {min(pred_index)}',
+                        f'Forecasting {var} Tahun {min(pred_index)}',
                         fontsize=12)
                 else:
-                    fig2.suptitle(f'Forecasting {var} Daerah Kabupaten Tulungagung Tahun {min(pred_index)} - {max(pred_index)}', fontsize=12)
+                    fig2.suptitle(f'Forecasting {var} Tahun {min(pred_index)} - {max(pred_index)}', fontsize=12)
                 dataset.index = dataset.index.astype(int)
                 past2, = plt.plot(dataset.index, dataset, "b.-", label= f'History {var}')
                 future2, = plt.plot(pred_index, forecast_rill, "g.--", label= f'Forecasting {var}')
@@ -252,7 +255,7 @@ if uploaded_file is not None:
                 plt.grid(True, linestyle="--", alpha=0.6)
                 plt.legend(handles=[past2, future2], loc="upper left")
             # Plot uji kebaikan model
-            st.subheader("Uji Kebaikan Model")
+            st.subheader("Uji Kebaikan Metode")
             st.pyplot(fig)
             # Plot hasil forecasting
             st.subheader("Hasil Forecasting")
@@ -263,6 +266,6 @@ if uploaded_file is not None:
 # footer
 st.markdown("""
     <div class="custom-footer">
-        © 2025 BPKAD Kabupaten Tulungagung - Dibuat untuk Aktualisasi Latsar CPNS
+        © 2025 BPKAD Kabupaten Tulungagung - Dibuat untuk Aktualisasi Latsar CPNS Tahun 2025
     </div>
 """, unsafe_allow_html=True)
