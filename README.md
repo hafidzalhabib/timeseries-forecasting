@@ -42,7 +42,7 @@ A web-based forecasting application developed as part of the CPNS 2025 Basic Tra
 3. Input the number of periods to forecast.
 4. Click **Run Forecast**.
 5. View the plot, RMSE value, and resulting forecast table.
-6. Download the result as Excel or CSV.
+6. Download the result as Excel.
 
 ---
 
@@ -73,8 +73,8 @@ web-forecasting/
 
 ## 👤 Author
 
-**Ahmad Hafidz**  
-📍 CPNS Angkatan 2025  
+**Mohamad Hafidz Al Habib**  
+📍 CPNS Kabupaten Tulungagung Angkatan 2025  
 📧 hafidzalhabib@gmail.com  
 🔗 [LinkedIn](www.linkedin.com/in/mohamad-hafidz-al-habib-99609b237)
 
@@ -97,5 +97,4 @@ See the [LICENSE](LICENSE) file for more details.
 
 ## 📚 Notes
 
-Project ini dikembangkan sebagai bagian dari tugas aktualisasi Latsar CPNS 2025.  
-Aplikasi ini diharapkan dapat digunakan untuk kebutuhan analisis dan perencanaan berbasis data di instansi pemerintahan maupun sektor lainnya.
+Project ini dikembangkan sebagai bagian dari tugas aktualisasi Latsar CPNS 2025. Aplikasi ini diharapkan dapat digunakan untuk kebutuhan analisis dan perencanaan berbasis data di instansi pemerintahan maupun sektor lainnya.
