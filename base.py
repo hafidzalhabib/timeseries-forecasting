@@ -1,5 +1,4 @@
 import streamlit as st
-# from streamlit.components.v1 import html
 import pandas as pd
 import openpyxl
 from matplotlib import pyplot as plt
@@ -8,6 +7,7 @@ from statsmodels.tsa.api import SimpleExpSmoothing, Holt
 from sklearn.metrics import mean_squared_error
 import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
+from io import BytesIO
 # setting config
 st.set_page_config(
     page_title="Time Series Forecasting App",
@@ -261,6 +261,21 @@ if uploaded_file is not None:
             st.subheader("Hasil Forecasting")
             st.dataframe(tabel_forecast.style.format({var: '{:,.0f}'}))
             st.pyplot(fig2)
+            # tambah tombol download dataset
+            dataset = pd.concat([dataset, tabel_forecast])
+            def to_excel(df):
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='openpyxl') as writer:  # atau tanpa "engine" jika default
+                    df.to_excel(writer, index=True, sheet_name='Sheet1')
+                return output.getvalue()
+            excel_file = to_excel(dataset)
+            # Tombol download
+            st.download_button(
+                label="Download Hasil",
+                data=excel_file,
+                file_name="dataset.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
     except Exception as e:
         st.error(f"Gagal membaca file: {e}")
 # footer
