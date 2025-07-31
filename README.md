@@ -37,12 +37,13 @@ A web-based forecasting application developed as part of the CPNS 2025 Basic Tra
 
 ## 📦 Usage
 
-1. Upload your `.xlsx` or `.csv` file containing time series data.
-2. Choose which column to forecast and select the forecasting method.
-3. Input the number of periods to forecast.
-4. Click **Run Forecast**.
-5. View the plot, RMSE value, and resulting forecast table.
-6. Download the result as Excel.
+1. Open link [this link](https://timeseries-forecasting.streamlit.app/)
+2. Upload your `.xlsx` or `.csv` file containing time series data.
+3. Choose which column to forecast and select the forecasting method.
+4. Input the number of periods to forecast.
+5. Click **PILIH**.
+6. View the plot, RMSE value, and resulting forecast table.
+7. Download the result as Excel.
 
 ---
 
