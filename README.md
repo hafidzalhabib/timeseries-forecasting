@@ -76,7 +76,7 @@ web-forecasting/
 **Mohamad Hafidz Al Habib**  
 📍 CPNS Kabupaten Tulungagung Angkatan 2025  
 📧 hafidzalhabib@gmail.com  
-🔗 [LinkedIn](www.linkedin.com/in/mohamad-hafidz-al-habib-99609b237)
+🔗 [LinkedIn](https://www.linkedin.com/in/mohamad-hafidz-al-habib-99609b237)
 
 ---
 
