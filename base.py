@@ -109,7 +109,6 @@ if uploaded_file is not None:
             forecast = st.number_input(label="Masukkan jumlah forecast", min_value=0, max_value=100)
         # Buat fix dataset
         dataset = df[[tahun, var]]
-        # dataset[tahun] = pd.to_datetime(dataset[tahun], errors="coerce")
         dataset[var] = pd.to_numeric(dataset[var], errors='coerce')
         dataset = dataset.set_index(tahun)
         # split train dan test data
@@ -201,7 +200,16 @@ if uploaded_file is not None:
             with st.spinner("⏳ Sedang memproses data. Sabar ya😊😅..."):
                 # Buat konversi ke nilai miliar
                 def miliar_format(x, pos):
-                    return f'{x / 1e9:,.1f} M'
+                    if x >= 1000000000000:
+                        return f'{x / 1e12:,.1f} T'
+                    elif x >= 1000000000:
+                        return f'{x / 1e9:,.1f} M'
+                    elif x >= 1000000:
+                        return f'{x / 1e6:,.1f} Juta'
+                    elif x >= 1000:
+                        return f'{x / 1e3:,.1f} Ribu'
+                    else:
+                        return x
                 # Ambil parameter hasil grid search
                 alpha, beta, pdq, mse = param(df_train, df_test)
                 # forecast data train
@@ -219,7 +227,7 @@ if uploaded_file is not None:
                 plt.yticks(fontsize=10)
                 plt.grid(True, linestyle="--", alpha=0.6)
                 plt.legend(handles=[past, future, pred_future], loc="upper left")
-                plt.text(0.025, 0.75, f"RMSE: {np.sqrt(mse) / 1e9:,.1f} M",
+                plt.text(0.025, 0.75, f"RMSE: {miliar_format(np.sqrt(mse), pos = None)}",
                          transform=plt.gca().transAxes,
                          fontsize=10,
                          color='black',
@@ -248,7 +256,7 @@ if uploaded_file is not None:
                 future2, = plt.plot(pred_index, forecast_rill, "g.--", label= f'Forecasting {var}')
                 plt.gca().yaxis.set_major_formatter(ticker.FuncFormatter(miliar_format))
                 plt.xlabel(f'{tahun}', fontsize=10)
-                plt.ylabel(f'{var} (Miliar Rupiah)', fontsize=10)
+                plt.ylabel(f'{var}', fontsize=10)
                 plt.xticks(fontsize=10)
                 plt.yticks(fontsize=10)
                 plt.gca().xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
