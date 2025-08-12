@@ -169,7 +169,7 @@ if uploaded_file:
             forecasting = fix_model.forecast(fix_forecast)
             return forecasting
         # tombol proses data
-        pilih = st.button('**PILIH**')
+        pilih = st.button('**Proses Forecast**')
         if pilih:
             with st.spinner("⏳ Sedang memproses data. Sabar ya😊😅..."):
                 # Buat konversi ke nilai miliar
@@ -266,3 +266,4 @@ st.markdown("""
         © 2025 BPKAD Kabupaten Tulungagung - Dibuat untuk Aktualisasi Latsar CPNS Tahun 2025
     </div>
 """, unsafe_allow_html=True)
+
