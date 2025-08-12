@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import openpyxl
 from matplotlib import pyplot as plt
 import matplotlib.ticker as ticker
 from statsmodels.tsa.api import SimpleExpSmoothing, Holt
@@ -63,24 +62,21 @@ st.markdown("""
     <hr style="border: none; height: 2px; background-color: #ccc; margin-top: 10px;">
 """, unsafe_allow_html=True)
 # Upload file
+def safe_session_get(key, default=None):
+    return st.session_state.get(key, default)
 st.subheader("Upload Data")
-uploaded_file = st.file_uploader("Unggah file Excel (.xlsx)", type=["xlsx", "csv"])
+uploaded_file = st.file_uploader("Unggah file Excel (.xlsx / .csv)", type=["xlsx", "csv"])
 st.caption("Panduan [klik disini](%s)" % "https://youtu.be/ClxcSgtwIiA")
-if uploaded_file is not None:
-    if uploaded_file.name != st.session_state["uploaded_filename"]:
-        st.toast(f"✅ File berhasil diunggah: {uploaded_file.name}")
-        st.session_state["file_uploaded"] = True
-        st.session_state["uploaded_filename"] = uploaded_file.name
-else:
-    st.session_state["file_uploaded"] = False
-    st.session_state["uploaded_filename"] = None
 # membaca file
-if uploaded_file is not None:
+if uploaded_file:
+    if uploaded_file.name != safe_session_get("uploaded_filename"):
+        st.toast(f"✅ File berhasil diunggah: {uploaded_file.name}")
+        st.session_state["uploaded_filename"] = uploaded_file.name
     try:
         if uploaded_file.name.lower().endswith('.csv'):
             df = pd.read_csv(uploaded_file)
-        elif uploaded_file.name.lower().endswith(('.xls', '.xlsx')):
-            df = pd.read_excel(uploaded_file, parse_dates=True)
+        else:
+            df = pd.read_excel(uploaded_file)
         # formatting data
         def formatting(df):
             # Deteksi kolom pertama
@@ -116,59 +112,37 @@ if uploaded_file is not None:
         df_test = dataset.iloc[round(len(dataset) * 0.8):]
         # gridsearch simple exponential smoothing
         def grid_ses(train, test):
-            best_score = float("inf")
-            best_alpha = None
-            results = []
-            alphas = np.arange(0.01, 1.01, 0.01)  # rentang smoothing_level
-            for alpha in alphas:
+            best_score, best_alpha = float("inf"), None
+            for alpha in np.arange(0.01, 1.01, 0.01):
                 model = SimpleExpSmoothing(train).fit(smoothing_level=alpha, optimized=False)
-                forecast = model.forecast(len(test))
-                mse = mean_squared_error(test, forecast)
-                results.append((alpha, mse))
+                mse = mean_squared_error(test, model.forecast(len(test)))
                 if mse < best_score:
-                    best_score = mse
-                    best_alpha = alpha
+                    best_score, best_alpha = mse, alpha
             return best_score, best_alpha
         # gridsearch holt's exponential smoothing
         def grid_holts(train, test):
-            best_score = float("inf")
-            best_alpha, best_beta = None, None
-            results = []
-            alpha_range = np.arange(0.01, 1.01, 0.1)
-            beta_range = np.arange(0.01, 1.01, 0.1)
-            for alpha in alpha_range:
-                for beta in beta_range:
+            best_score, best_alpha, best_beta = float("inf"), None, None
+            for alpha in np.arange(0.01, 1.01, 0.1):
+                for beta in np.arange(0.01, 1.01, 0.1):
                     try:
                         model = Holt(train).fit(smoothing_level=alpha, smoothing_slope=beta, optimized=False)
-                        forecast = model.forecast(len(test))
-                        mse = mean_squared_error(test, forecast)
-                        results.append((alpha, beta, mse))
+                        mse = mean_squared_error(test, model.forecast(len(test)))
                         if mse < best_score:
-                            best_score = mse
-                            best_alpha = alpha
-                            best_beta = beta
+                            best_score, best_alpha, best_beta = mse, alpha, beta
                     except:
-                        continue  # skip if model fails to fit with given params
+                        continue
             return best_score, best_alpha, best_beta
         # gridsearch arima
-        def grid_arima(train, test):
-            p_values = range(0, 4)
-            d_values = range(0, 2)
-            q_values = range(0, 4)
-            best_score = float("inf")
-            best_cfg = None
-            results = []
-            for p in p_values:
-                for d in d_values:
-                    for q in q_values:
+        def grid_arima(train, test, p_max=3, d_max=1, q_max=3):
+            best_score, best_cfg = float("inf"), None
+            for p in range(0, p_max + 1):
+                for d in range(0, d_max + 1):
+                    for q in range(0, q_max + 1):
                         try:
                             model = ARIMA(train, order=(p, d, q)).fit()
-                            forecast = model.forecast(steps=len(test))
-                            mse = mean_squared_error(test, forecast)
-                            results.append(((p, d, q), mse))
+                            mse = mean_squared_error(test, model.forecast(len(test)))
                             if mse < best_score:
-                                best_score = mse
-                                best_cfg = (p, d, q)
+                                best_score, best_cfg = mse, (p, d, q)
                         except:
                             continue
             return best_score, best_cfg
